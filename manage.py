@@ -1,13 +1,18 @@
 #!/usr/local/bin/python3.6
 
+# Authenticate/Decrypt packet error: bad packet ID (may be a replay): [ #15477 ] -- see the man page entry for --no-replay and --replay-window for more info or silence this warning with --mute-replay-warnings
+
 import requests
 import libtorrent
-import time, sys, os
+import time, sys, os, datetime
+#import subprocess
+import dbus
 
 DEFAULT_PORT = 6881
 RETRY_PORTS = 10
 OUT_DIR = "/tmp/torrents"
-DEFAULT_PIA_NODE = "US\\ East.ovpn"
+DEFAULT_PIA_NODE = "US East.ovpn"
+MINUTES_BETWEEN_CHECKS = 5
 
 class IP:
     def __init__(self, s):
@@ -51,6 +56,15 @@ class Downloader:
             if torrent.is_seeding:
                 self.session.remove_torrent(torrent)
 
+#class VpnConn:
+#    def __init__(self):
+#        username = os.environ.get("PIA_USERNAME")
+#        password = os.environ.get("PIA_PASSWORD")
+#        self.proc = subprocess.Popen(["openvpn", DEFAULT_PIA_NODE], \
+#                stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+#        del username, password
+
+
 def check_ip():
     # todo throw instead?
     r = requests.get("https://icanhazip.com")
@@ -59,11 +73,20 @@ def check_ip():
 
 if __name__ == "__main__":
     d = Downloader()
-    ip = check_ip()
-    print("My ip is ", ip)
+    my_ip = check_ip()
+    print("My ip is ", my_ip)
+    input("start your engines")
+    masked_ip = check_ip()
     d.add("ubuntu-17.04-desktop-amd64.iso.torrent")
+    seconds = 0
     while True:
-        print("\r", d.status())
-        time.sleep(1)
-
+        if seconds % 300 == 0:
+            masked_ip = check_ip()
+            if masked_ip == my_ip:
+                print("Something fucked up")
+                exit(42)
+        print("\r", datetime.datetime.now(), d.status())
+        time.sleep(30)
+        seconds += 30
+    print("Done")
 
