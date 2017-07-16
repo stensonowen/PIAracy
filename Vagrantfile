@@ -10,5 +10,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
 
   config.vm.provision "shell", path: "vagrant.sh"#, privileged: false
   #config.vm.synced_folder "shared/", "/home/vagrant/shared"
+  config.vm.network "forwarded_port", guest: 9091, host: 9091
 
 end
+

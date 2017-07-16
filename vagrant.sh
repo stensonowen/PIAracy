@@ -2,7 +2,6 @@
 # for fedora
 # remember to put your "USERNAME\nPASSWORD" in the file ".creds"
 
-
 # vars
 DIR=/tmp/pia        # temporary/backup place for config files
 CREDS_FN=".creds"   # filename where pia credentials will be stored in plaintext
